@@ -111,12 +111,13 @@ def resnet18(num_classes, grayscale):
 
 
 class Master:
-    def __init__(self, server_address=('10.3.129.180', 9090), num_classes=10, grayscale=False):
+    def __init__(self, server_address=('localhost', 9090), num_classes=10, grayscale=False):
         self.server_address = server_address
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect(self.server_address)
         self.model = resnet18(num_classes=num_classes, grayscale=grayscale)
-        torch.save(self.model, '/mnt/parameters/global_model.pt')
+        torch.save(
+            self.model, 'D:\INL\RnD\middle-controller\middle-controller\middle-controller\parameters\global_model.pt')
 
     def deploy_weight(self):
         startmsg = "start\n"
@@ -145,14 +146,16 @@ class Master:
         train_client_id = [1]
 
         for k in train_client_id:
-            client_model = torch.load(f'/mnt/parameters/client_model_{k}.pt')
+            client_model = torch.load(
+                f'D:\INL\RnD\middle-controller\middle-controller\middle-controller\parameters\client_model_{k}.pt')
             running_avg = self.running_model_avg(
                 running_avg, client_model.state_dict(), 1 / len(train_client_id))
 
         self.model.load_state_dict(running_avg)
         accuracy = self.validate(test_loader)
         print(f"Accuracy: {accuracy}")
-        torch.save(self.model, '/mnt/parameters/global_model.pt')
+        torch.save(
+            self.model, 'D:\INL\RnD\middle-controller\middle-controller\middle-controller\parameters\global_model.pt')
 
         filename = "global_model.pt\n"
         self.s.sendall(filename.encode('utf-8'))
