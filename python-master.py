@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import time
 import math
+import os
 
 
 def log_message(message):
@@ -117,8 +118,9 @@ class Master:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect(self.server_address)
         self.model = resnet18(num_classes=num_classes, grayscale=grayscale)
+        FILE_PATH = os.getenv('FILE_PATH')
         torch.save(
-            self.model, 'D:\INL\RnD\middle-controller\middle-controller\middle-controller\parameters\global_model.pt')
+            self.model, os.path.join(FILE_PATH, 'global_model.pt'))
 
     def deploy_weight(self):
         startmsg = "start\n"
@@ -147,8 +149,9 @@ class Master:
         train_client_id = [1]
 
         for k in train_client_id:
+            FILE_PATH = os.getenv('FILE_PATH')
             client_model = torch.load(
-                f'D:\INL\RnD\middle-controller\middle-controller\middle-controller\parameters\client_model_{k}.pt')
+                os.path.join(FILE_PATH, f'client_model_{k}.pt'))
             running_avg = self.running_model_avg(
                 running_avg, client_model.state_dict(), 1 / len(train_client_id))
 
@@ -156,7 +159,7 @@ class Master:
         accuracy = self.validate(test_loader)
         print(f"Accuracy: {accuracy}")
         torch.save(
-            self.model, 'D:\INL\RnD\middle-controller\middle-controller\middle-controller\parameters\global_model.pt')
+            self.model, os.path.join(FILE_PATH, 'global_model.pt'))
 
         filename = "global_model.pt\n"
         self.s.sendall(filename.encode('utf-8'))
