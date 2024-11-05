@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import time
+import math
 
 
 def log_message(message):
@@ -187,6 +188,8 @@ class Master:
 
 if __name__ == "__main__":
 
+    start = time.time()
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     log_message("The pod running with {0}".format(device))
 
@@ -203,3 +206,7 @@ if __name__ == "__main__":
     # Master 클래스 인스턴스 생성 및 실행
     master = Master()
     master.run(test_loader_CIFAR10)
+
+    end = time.time()
+
+    print(f"{end-start:.5f} sec")
