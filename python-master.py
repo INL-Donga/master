@@ -7,6 +7,13 @@ import time
 import math
 import os
 
+# FILE_PATH = os.getenv('FILE_PATH')
+# EPOCHS = int(os.getenv('EPOCHS'))
+
+
+FILE_PATH = "D:\INL\RnD\master\master"
+EPOCHS = int("100")
+
 
 def log_message(message):
     current_time = time.strftime(
@@ -113,14 +120,30 @@ def resnet18(num_classes, grayscale):
 
 
 class Master:
-    def __init__(self, server_address=('localhost', 9090), num_classes=10, grayscale=False):
+    def __init__(self, server_address=('localhost', 9090), num_classes=10, grayscale=False, max_retries=6, retry_interval=10):
         self.server_address = server_address
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect(self.server_address)
+
+        # 재시도 로직 추가
+        retries = 0
+        while retries < max_retries:
+            try:
+                self.s.connect(self.server_address)
+                print("Connected to file-server")
+                break
+            except ConnectionRefusedError:
+                retries += 1
+                print(
+                    f"Connection refused, retrying... ({retries}/{max_retries})")
+                time.sleep(retry_interval)
+
+        # 최대 재시도 횟수 초과 시 에러 메시지
+        if retries == max_retries:
+            raise ConnectionError(
+                "Max retries exceeded, could not connect to the file-server.")
+
         self.model = resnet18(num_classes=num_classes, grayscale=grayscale)
-        FILE_PATH = os.getenv('FILE_PATH')
-        torch.save(
-            self.model, os.path.join(FILE_PATH, 'global_model.pt'))
+        torch.save(self.model, os.path.join(FILE_PATH, 'global_model.pt'))
 
     def deploy_weight(self):
         startmsg = "start\n"
@@ -149,7 +172,7 @@ class Master:
         train_client_id = [1]
 
         for k in train_client_id:
-            FILE_PATH = os.getenv('FILE_PATH')
+
             client_model = torch.load(
                 os.path.join(FILE_PATH, f'client_model_{k}.pt'))
             running_avg = self.running_model_avg(
@@ -208,7 +231,7 @@ if __name__ == "__main__":
 
     # Master 클래스 인스턴스 생성 및 실행
     master = Master()
-    master.run(test_loader_CIFAR10)
+    master.run(test_loader_CIFAR10, rounds=EPOCHS)
 
     end = time.time()
 
