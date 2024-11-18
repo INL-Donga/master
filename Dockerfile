@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-CMD [ "python", "python-master.py"]
+CMD ["python", "-u", "python-master.py"]
 
 # CMD ["tail", "-f", "/dev/null"]
 

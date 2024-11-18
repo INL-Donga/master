@@ -7,12 +7,8 @@ import time
 import math
 import os
 
-# FILE_PATH = os.getenv('FILE_PATH')
-# EPOCHS = int(os.getenv('EPOCHS'))
-
-
-FILE_PATH = "D:\INL\RnD\master\master"
-EPOCHS = int("100")
+FILE_PATH = os.getenv('FILE_PATH')
+ROUNDS = int(os.getenv('ROUNDS'))
 
 
 def log_message(message):
@@ -231,8 +227,8 @@ if __name__ == "__main__":
 
     # Master 클래스 인스턴스 생성 및 실행
     master = Master()
-    master.run(test_loader_CIFAR10, rounds=EPOCHS)
+    master.run(test_loader_CIFAR10, rounds=ROUNDS)
 
     end = time.time()
 
-    print(f"{end-start:.5f} sec")
+    print(f"Time : {end-start:.5f} sec")
