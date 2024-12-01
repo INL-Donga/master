@@ -10,6 +10,9 @@ import os
 FILE_PATH = os.getenv('FILE_PATH')
 ROUNDS = int(os.getenv('ROUNDS'))
 
+# FILE_PATH = "D:\\INL\\RnD\\middle-controller\\middle-controller\\middle-controller\\parameters\\"
+# ROUNDS = 20
+
 # logging 설정
 logging.basicConfig(
     level=logging.INFO,
@@ -148,7 +151,8 @@ class Master:
 
         accuracy = self.validate(test_loader)
         logger.info(f"Validation accuracy: {accuracy}")
-        torch.save(self.model, os.path.join(FILE_PATH, 'global_model.pt'))
+        torch.save(self.model.state_dict(), os.path.join(
+            FILE_PATH, 'global_model.pt'))
 
         filename = "global_model.pt\n"
         self.s.sendall(filename.encode('utf-8'))
