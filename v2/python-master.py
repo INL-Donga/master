@@ -9,7 +9,7 @@ import os
 
 FILE_PATH = os.getenv('FILE_PATH')
 ROUNDS = int(os.getenv('ROUNDS'))
-
+CLIENT_COUNT = int(os.getenv('CLIENT_COUNT'))
 # FILE_PATH = "D:\\INL\\RnD\\middle-controller\\middle-controller\\middle-controller\\parameters\\"
 # ROUNDS = 20
 
@@ -89,7 +89,7 @@ class Master:
     def __init__(self, server_address=('localhost', 9090), num_classes=10, grayscale=False, max_retries=6, retry_interval=10):
         self.server_address = server_address
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+        self.train_client_counts = CLIENT_COUNT
         # 재시도 로직 추가
         retries = 0
         while retries < max_retries:
@@ -137,13 +137,12 @@ class Master:
         logger.info(f"Received file: {filename}")
 
         running_avg = None
-        train_client_id = [1]
 
-        for k in train_client_id:
+        for k in range(1, self.train_client_counts+1):
             client_model = torch.load(os.path.join(
                 FILE_PATH, f'client_model_{k}.pt'))
             running_avg = self.running_model_avg(
-                running_avg, client_model, 1 / len(train_client_id))
+                running_avg, client_model, 1 / self.train_client_counts)
 
         state_dict = self.model.state_dict()
         state_dict.update(running_avg)
